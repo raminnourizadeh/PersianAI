@@ -1,0 +1,61 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# IDE and operating-system files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+.codex/
+.agents/
+
+
+# Logs and runtime files
+*.log
+*.pid
+*.sock
+tmp/
+temp/
+
+# Local model/data caches
+.cache/
+models/
+qdrant_storage/
+storage/
+
+# Generated evaluation and benchmark artifacts
+evaluation_*.json
+comparison_*.json
+reranker_evaluation.json
+
+# Local/private organizational data
+data/hr/*.xlsx
+data/hr/*.xls
+data/documents/*
+!data/documents/.gitkeep
+
+# Generated search indexes (rebuild with scripts/ingest.py)
+data/indexes/*
+!data/indexes/.gitkeep
+
+# User-uploaded temporary files
+uploads/

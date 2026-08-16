@@ -1,0 +1,945 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>دستیار اسناد فارسی</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #ffffff;
+            --sidebar: #f9f9f9;
+            --soft: #f4f4f4;
+            --soft-hover: #ececec;
+            --line: #e5e5e5;
+            --text: #0d0d0d;
+            --muted: #676767;
+            --accent: #10a37f;
+            --danger: #b42318;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            overflow: hidden;
+            color: var(--text);
+            background: var(--bg);
+            font-family: Vazirmatn, IRANSans, Tahoma, Arial, sans-serif;
+        }
+
+        button, textarea, select { font: inherit; }
+        button { border: 0; cursor: pointer; }
+
+        .app-shell {
+            display: grid;
+            grid-template-columns: 260px minmax(0, 1fr);
+            height: 100vh;
+            direction: rtl;
+        }
+
+        .sidebar {
+            direction: rtl;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 12px;
+            background: var(--sidebar);
+            border-left: 1px solid var(--line);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 8px 14px;
+            font-weight: 700;
+        }
+
+        .brand-mark, .avatar {
+            display: grid;
+            place-items: center;
+            flex: 0 0 auto;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            color: #fff;
+            background: var(--text);
+            font-size: 14px;
+        }
+
+        .new-chat {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 11px 12px;
+            border-radius: 10px;
+            color: var(--text);
+            background: transparent;
+            text-align: right;
+        }
+
+        .new-chat:hover { background: var(--soft-hover); }
+
+        .upload-box {
+            padding: 11px;
+            border: 1px dashed #cfcfcf;
+            border-radius: 12px;
+            background: #fff;
+        }
+
+        .upload-button {
+            width: 100%;
+            padding: 9px 10px;
+            border-radius: 9px;
+            color: var(--text);
+            background: var(--soft);
+            font-size: 13px;
+        }
+
+        .upload-button:hover { background: var(--soft-hover); }
+        .upload-progress-row {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-top: 8px;
+        }
+
+        .upload-status { color: var(--muted); font-size: 11px; line-height: 1.7; }
+
+        .upload-spinner {
+            display: none;
+            flex: 0 0 auto;
+            width: 15px;
+            height: 15px;
+            border: 2px solid #d7d7d7;
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: upload-spin .7s linear infinite;
+        }
+
+        .upload-spinner.visible { display: inline-block; }
+
+        @keyframes upload-spin {
+            to { transform: rotate(360deg); }
+        }
+        .uploaded-files { margin: 7px 0 0; padding: 0 17px 0 0; color: #444; font-size: 11px; line-height: 1.8; }
+
+        .sidebar-note {
+            margin-top: auto;
+            padding: 12px;
+            border-top: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .ready-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin-left: 6px;
+            border-radius: 50%;
+            background: #f5a524;
+        }
+
+        .ready-dot.ready { background: var(--accent); }
+        .ready-dot.failed { background: var(--danger); }
+
+        .main {
+            direction: rtl;
+            display: flex;
+            min-width: 0;
+            height: 100vh;
+            flex-direction: column;
+            background: var(--bg);
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 58px;
+            padding: 8px 18px;
+            background: rgba(255, 255, 255, .9);
+            border-bottom: 1px solid transparent;
+            backdrop-filter: blur(12px);
+        }
+
+        .title { font-size: 16px; font-weight: 600; }
+        .model-pill {
+            padding: 7px 11px;
+            border-radius: 999px;
+            color: var(--muted);
+            background: var(--soft);
+            font-size: 12px;
+        }
+
+        .mobile-upload {
+            display: none;
+            padding: 7px 10px;
+            border-radius: 999px;
+            color: var(--text);
+            background: var(--soft);
+            font-size: 12px;
+        }
+
+        .conversation {
+            flex: 1;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        .welcome {
+            display: grid;
+            place-items: center;
+            min-height: 65vh;
+            padding: 28px;
+            text-align: center;
+        }
+
+        .welcome-inner { max-width: 580px; }
+        .welcome-mark {
+            display: grid;
+            place-items: center;
+            width: 54px;
+            height: 54px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            color: #fff;
+            background: var(--text);
+            font-size: 22px;
+        }
+
+        .welcome h1 { margin: 0 0 10px; font-size: 28px; }
+        .welcome p { margin: 0; color: var(--muted); line-height: 1.9; }
+
+        .message {
+            width: min(100%, 800px);
+            margin: 0 auto;
+            padding: 18px 24px;
+        }
+
+        .message-row { display: flex; align-items: flex-start; gap: 13px; }
+        .message.user .message-row { justify-content: flex-start; }
+        .message.user .bubble {
+            max-width: min(78%, 650px);
+            padding: 11px 16px;
+            border-radius: 20px 20px 5px 20px;
+            background: var(--soft);
+            line-height: 1.9;
+            white-space: pre-wrap;
+        }
+
+        .message.assistant .avatar { background: var(--accent); }
+        .assistant-content { min-width: 0; flex: 1; }
+        .assistant-label { margin-bottom: 7px; font-size: 13px; font-weight: 700; }
+        .answer {
+            font-size: 16px;
+            line-height: 2.05;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .streaming-cursor::after { content: "▍"; animation: blink .8s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        .source-reference {
+            color: #087f65;
+            border-bottom: 1px dashed currentColor;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .meta-panel {
+            margin-top: 18px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .meta-panel summary {
+            padding: 11px 14px;
+            color: var(--muted);
+            background: #fafafa;
+            cursor: pointer;
+            font-size: 13px;
+            user-select: none;
+        }
+
+        .timings {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
+            gap: 8px;
+            padding: 12px;
+        }
+
+        .timing {
+            padding: 9px;
+            border-radius: 9px;
+            background: var(--soft);
+            text-align: center;
+        }
+
+        .timing span { display: block; color: var(--muted); font-size: 11px; }
+        .timing strong { display: block; margin-top: 4px; font-size: 14px; }
+
+        .sources { padding: 4px 12px 12px; }
+        .source {
+            margin-top: 8px;
+            padding: 10px 12px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            scroll-margin-top: 80px;
+            transition: .25s ease;
+        }
+
+        .source-highlight {
+            border-color: #e6a700;
+            background: #fff8db;
+            box-shadow: 0 0 0 3px rgba(230, 167, 0, .14);
+        }
+
+        .source summary { cursor: pointer; font-size: 13px; font-weight: 700; }
+        .source-score { margin-top: 6px; color: var(--muted); font-size: 11px; }
+        .source-text { margin-top: 10px; color: #333; font-size: 13px; line-height: 1.9; white-space: pre-wrap; }
+        .error-text { color: var(--danger); }
+        .validation-note {
+            margin-top: 12px;
+            padding: 8px 11px;
+            border-radius: 9px;
+            color: #176b52;
+            background: #ecfdf5;
+            font-size: 11px;
+        }
+        .validation-note.failed { color: #92400e; background: #fff7ed; }
+
+        .composer-area {
+            flex: 0 0 auto;
+            padding: 10px 20px 14px;
+            background: linear-gradient(0deg, #fff 80%, rgba(255,255,255,0));
+        }
+
+        .composer {
+            width: min(100%, 780px);
+            margin: 0 auto;
+            padding: 10px 12px 9px;
+            border: 1px solid #d8d8d8;
+            border-radius: 24px;
+            background: #fff;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, .08);
+        }
+
+        .composer-mode-row {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 0 4px 7px;
+        }
+
+        .mode-label {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .assistant-mode {
+            padding: 7px 11px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            outline: none;
+            color: var(--text);
+            background: var(--soft);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .hidden { display: none !important; }
+
+        textarea {
+            display: block;
+            width: 100%;
+            min-height: 30px;
+            max-height: 180px;
+            padding: 5px 7px 8px;
+            resize: none;
+            border: 0;
+            outline: 0;
+            color: var(--text);
+            background: transparent;
+            line-height: 1.7;
+        }
+
+        textarea::placeholder { color: #8b8b8b; }
+        .composer-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .mode-hint { padding-right: 6px; color: var(--muted); font-size: 11px; }
+        .action-buttons { display: flex; align-items: center; gap: 7px; }
+
+        .advanced-options { position: relative; }
+        .advanced-options > summary {
+            padding: 7px 10px;
+            border-radius: 999px;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 12px;
+            list-style: none;
+            user-select: none;
+        }
+        .advanced-options > summary::-webkit-details-marker { display: none; }
+        .advanced-options > summary::before { content: "⚙ "; }
+        .advanced-options[open] > summary { color: var(--text); background: var(--soft); }
+        .advanced-panel {
+            position: absolute;
+            z-index: 20;
+            right: 0;
+            bottom: 42px;
+            display: grid;
+            width: min(310px, calc(100vw - 38px));
+            gap: 9px;
+            padding: 12px;
+            border: 1px solid var(--line);
+            border-radius: 15px;
+            background: #fff;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, .14);
+        }
+        .advanced-title { font-size: 12px; font-weight: 700; }
+        .advanced-description { color: var(--muted); font-size: 10px; line-height: 1.7; }
+
+        .scope-select {
+            width: 100%;
+            max-width: none;
+            padding: 7px 10px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            outline: none;
+            color: #333;
+            background: #fff;
+            font-size: 12px;
+        }
+
+        .precise-button {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            color: #333;
+            background: #fff;
+            font-size: 12px;
+        }
+
+        .precise-button:hover { background: var(--soft); }
+        .send-button {
+            display: grid;
+            place-items: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            color: #fff;
+            background: var(--text);
+            font-size: 18px;
+        }
+
+        .send-button:hover { background: #303030; }
+        button:disabled { cursor: not-allowed; opacity: .45; }
+        .disclaimer { margin-top: 7px; color: var(--muted); font-size: 10px; text-align: center; }
+
+        @media (max-width: 760px) {
+            .app-shell { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+            .mobile-upload { display: inline-block; }
+            .topbar { padding-inline: 14px; }
+            .message { padding: 15px 14px; }
+            .message.user .bubble { max-width: 90%; }
+            .composer-area { padding: 8px 9px 10px; }
+            .welcome h1 { font-size: 23px; }
+            .mode-hint { display: none; }
+            .advanced-panel { position: fixed; right: 10px; bottom: 92px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="brand"><span class="brand-mark">پ</span><span>دستیار اسناد فارسی</span></div>
+        <button id="new-chat" class="new-chat" type="button"><span>گفت‌وگوی جدید</span><span>＋</span></button>
+        <div class="upload-box">
+            <button class="upload-button upload-trigger" type="button">＋ افزودن PDF موقت</button>
+            <div class="upload-progress-row" role="status" aria-live="polite">
+                <span id="upload-spinner" class="upload-spinner" aria-hidden="true"></span>
+                <span id="upload-status" class="upload-status">فایل‌ها فقط تا پایان این جلسه در حافظه می‌مانند.</span>
+            </div>
+            <ul id="uploaded-files" class="uploaded-files"></ul>
+        </div>
+        <div class="sidebar-note">
+            <div><span id="ready-dot" class="ready-dot"></span><span id="model-status">در حال آماده‌سازی مدل سریع…</span></div>
+            <div>حالت اسناد مبتنی بر منابع است؛ منابع انسانی آمار فایل کارکنان را تحلیل می‌کند.</div>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div class="title">دستیار هوشمند اسناد</div>
+            <div>
+                <button class="mobile-upload upload-trigger" type="button">＋ PDF</button>
+                <span id="active-model" class="model-pill">Qwen3 8B · سریع</span>
+            </div>
+        </header>
+
+        <section id="conversation" class="conversation" aria-live="polite">
+            <div id="welcome" class="welcome">
+                <div class="welcome-inner">
+                    <div class="welcome-mark">پ</div>
+                    <h1>چطور می‌توانم کمک کنم؟</h1>
+                    <p>از اسناد سؤال کنید، کار اداری انجام دهید یا داده کارکنان را در بخش «منابع انسانی» تحلیل کنید.</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="composer-area">
+            <form id="question-form" class="composer">
+                <div class="composer-mode-row">
+                    <span class="mode-label">نوع دستیار</span>
+                    <select id="assistant-mode" class="assistant-mode" aria-label="انتخاب نوع دستیار">
+                        <option value="rag">پرسش از اسناد</option>
+                        <option value="office">دستیار اداری</option>
+                        <option value="hr">منابع انسانی</option>
+                    </select>
+                </div>
+                <textarea id="question-input" name="question" rows="1" required placeholder="پیام خود را بنویسید…"></textarea>
+                <div class="composer-actions">
+                    <span id="mode-hint" class="mode-hint">حالت عادی: Qwen3 8B</span>
+                    <div class="action-buttons">
+                        <details id="advanced-options" class="advanced-options">
+                            <summary>تنظیمات پاسخ</summary>
+                            <div class="advanced-panel">
+                                <div class="advanced-title">تنظیمات اختیاری</div>
+                                <div class="advanced-description">اگر انتخابی انجام ندهید، سیستم از تنظیمات سریع و پیشنهادی استفاده می‌کند.</div>
+                                <select id="scope-select" class="scope-select" aria-label="انتخاب سند">
+                                    <option value="">همه اسناد</option>
+                                </select>
+                                <select id="compare-select" class="scope-select" aria-label="مقایسه با سند دوم">
+                                    <option value="">بدون مقایسه</option>
+                                </select>
+                                <button id="precise-button" class="precise-button" type="button">✦ پاسخ دقیق‌تر با مدل ۱۴ میلیاردی</button>
+                            </div>
+                        </details>
+                        <button id="submit-button" class="send-button" type="submit" aria-label="ارسال">↑</button>
+                    </div>
+                </div>
+            </form>
+            <div class="disclaimer">پاسخ هوش مصنوعی ممکن است خطا داشته باشد؛ منابع را بررسی کنید.</div>
+        </div>
+    </main>
+</div>
+
+<input id="file-input" type="file" accept="application/pdf,.pdf" multiple hidden>
+
+<script>
+    const FAST_MODEL = "qwen3:8b";
+    const PRECISE_MODEL = "qwen3:14b";
+    const form = document.getElementById("question-form");
+    const input = document.getElementById("question-input");
+    const sendButton = document.getElementById("submit-button");
+    const preciseButton = document.getElementById("precise-button");
+    const conversation = document.getElementById("conversation");
+    const welcome = document.getElementById("welcome");
+    const activeModel = document.getElementById("active-model");
+    const modeHint = document.getElementById("mode-hint");
+    const modelStatus = document.getElementById("model-status");
+    const readyDot = document.getElementById("ready-dot");
+    const fileInput = document.getElementById("file-input");
+    const uploadStatus = document.getElementById("upload-status");
+    const uploadSpinner = document.getElementById("upload-spinner");
+    const uploadedFiles = document.getElementById("uploaded-files");
+    const scopeSelect = document.getElementById("scope-select");
+    const compareSelect = document.getElementById("compare-select");
+    const assistantMode = document.getElementById("assistant-mode");
+    const advancedOptions = document.getElementById("advanced-options");
+    const sessionId = crypto.randomUUID
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    let busy = false;
+    let uploading = false;
+
+    function updateAssistantMode() {
+        advancedOptions.open = false;
+        const office = assistantMode.value === "office";
+        const hr = assistantMode.value === "hr";
+        scopeSelect.classList.toggle("hidden", office || hr);
+        compareSelect.classList.toggle("hidden", office || hr);
+        input.placeholder = hr
+            ? "مثلاً تعداد کارکنان را به تفکیک نوع استخدام گزارش کن…"
+            : (office ? "مثلاً یک نامه رسمی برای درخواست جلسه بنویس…" : "درباره اسناد سؤال کنید…");
+        modeHint.textContent = hr
+            ? "منابع انسانی: در حال بررسی فایل داده…"
+            : (office ? "حالت دستیار اداری" : "حالت اسناد: Qwen3 8B");
+        if (hr) refreshHrStatus();
+    }
+
+    assistantMode.addEventListener("change", updateAssistantMode);
+
+    function element(tag, className, text) {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        if (text !== undefined) node.textContent = text;
+        return node;
+    }
+
+    function scrollToBottom() {
+        conversation.scrollTop = conversation.scrollHeight;
+    }
+
+    function resizeInput() {
+        input.style.height = "auto";
+        input.style.height = `${Math.min(input.scrollHeight, 180)}px`;
+    }
+
+    input.addEventListener("input", resizeInput);
+    input.addEventListener("keydown", event => {
+        if (event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault();
+            if (!busy) form.requestSubmit();
+        }
+    });
+
+    document.querySelectorAll(".upload-trigger").forEach(
+        trigger => trigger.addEventListener("click", () => {
+            if (!busy && !uploading) fileInput.click();
+        })
+    );
+
+    fileInput.addEventListener("change", async () => {
+        const files = [...fileInput.files];
+        if (!files.length || busy || uploading) return;
+        uploading = true;
+        input.disabled = true;
+        sendButton.disabled = true;
+        preciseButton.disabled = true;
+        assistantMode.disabled = true;
+        scopeSelect.disabled = true;
+        compareSelect.disabled = true;
+        uploadSpinner.classList.add("visible");
+        uploadStatus.textContent = `در حال پردازش ${files.length} فایل…`;
+        activeModel.textContent = "در حال آماده‌سازی PDF…";
+
+        const data = new FormData();
+        data.append("session_id", sessionId);
+        files.forEach(file => data.append("files", file));
+        try {
+            const response = await fetch("/api/session-documents", {method: "POST", body: data});
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const result = await response.json();
+            if (!result.ready) throw new Error(result.error || "پردازش فایل ناموفق بود.");
+            uploadStatus.textContent = `${result.message} (${result.chunks} قطعه متنی)`;
+            uploadedFiles.replaceChildren(...result.files.map(name => element("li", "", name)));
+            await refreshDocumentOptions();
+        } catch (error) {
+            uploadStatus.textContent = `خطا: ${error.message}`;
+        } finally {
+            uploading = false;
+            fileInput.value = "";
+            input.disabled = false;
+            sendButton.disabled = false;
+            preciseButton.disabled = false;
+            assistantMode.disabled = false;
+            scopeSelect.disabled = false;
+            compareSelect.disabled = false;
+            uploadSpinner.classList.remove("visible");
+            activeModel.textContent = "Qwen3 8B · سریع";
+            input.focus();
+        }
+    });
+
+    function addUserMessage(text) {
+        welcome?.remove();
+        const message = element("article", "message user");
+        const row = element("div", "message-row");
+        row.appendChild(element("div", "bubble", text));
+        message.appendChild(row);
+        conversation.appendChild(message);
+    }
+
+    function addAssistantMessage(model, mode) {
+        const message = element("article", "message assistant");
+        const row = element("div", "message-row");
+        const avatar = element("div", "avatar", "پ");
+        const content = element("div", "assistant-content");
+        const label = mode === "hr"
+            ? "تحلیلگر منابع انسانی"
+            : (mode === "office" ? "دستیار اداری" : (model === PRECISE_MODEL ? "پاسخ دقیق‌تر" : "پاسخ"));
+        content.appendChild(element("div", "assistant-label", label));
+        const answer = element("div", "answer streaming-cursor", "در حال یافتن منابع…");
+        content.appendChild(answer);
+        row.append(avatar, content);
+        message.appendChild(row);
+        conversation.appendChild(message);
+        return {message, content, answer};
+    }
+
+    function latinDigits(value) {
+        const digits = "۰۱۲۳۴۵۶۷۸۹";
+        return value.replace(/[۰-۹]/g, digit => digits.indexOf(digit));
+    }
+
+    function linkifyReferences(answerNode, messageScope) {
+        const text = answerNode.textContent;
+        const pattern = /\[منبع(?:\s+وب)?\s*([0-9۰-۹]+)\]/g;
+        const fragment = document.createDocumentFragment();
+        let last = 0;
+        let match;
+        while ((match = pattern.exec(text)) !== null) {
+            fragment.appendChild(document.createTextNode(text.slice(last, match.index)));
+            const number = latinDigits(match[1]);
+            const link = element("a", "source-reference", match[0]);
+            link.href = `#source-${number}`;
+            link.addEventListener("click", event => {
+                event.preventDefault();
+                const source = messageScope.querySelector(`[data-source-number="${number}"]`);
+                if (!source) return;
+                source.closest("details")?.setAttribute("open", "");
+                source.classList.add("source-highlight");
+                source.scrollIntoView({behavior: "smooth", block: "center"});
+                setTimeout(() => source.classList.remove("source-highlight"), 2600);
+            });
+            fragment.appendChild(link);
+            last = pattern.lastIndex;
+        }
+        if (!last) return;
+        fragment.appendChild(document.createTextNode(text.slice(last)));
+        answerNode.replaceChildren(fragment);
+    }
+
+    function renderDetails(content, timings, stats, sources, model) {
+        const timingPanel = element("details", "meta-panel");
+        timingPanel.appendChild(element("summary", "", "جزئیات زمان پردازش"));
+        const grid = element("div", "timings");
+        const values = [
+            ["Embedding", timings.embedding], ["Qdrant", timings.qdrant],
+            ["Retrieval", timings.retrieval], ["Reranker", timings.reranker],
+            [model, timings.llm], ["کل زمان", timings.total]
+        ];
+        for (const [label, value] of values) {
+            const item = element("div", "timing");
+            item.append(element("span", "", label), element("strong", "", `${value ?? "—"} ثانیه`));
+            grid.appendChild(item);
+        }
+        if (stats) {
+            const item = element("div", "timing");
+            item.append(element("span", "", "سرعت تولید"), element("strong", "", `${stats.tokens_per_second ?? "—"} توکن/ثانیه`));
+            grid.appendChild(item);
+        }
+        timingPanel.appendChild(grid);
+        content.appendChild(timingPanel);
+
+        if (!sources?.length) return;
+        const sourcePanel = element("details", "meta-panel");
+        sourcePanel.appendChild(element("summary", "", `منابع استفاده‌شده (${sources.length})`));
+        const list = element("div", "sources");
+        for (const source of sources) {
+            const box = element("details", "source");
+            box.dataset.sourceNumber = source.number;
+            const sourceSummary = element(
+                "summary",
+                "",
+                `منبع ${source.number} — ${source.source} — ${source.page === "وب" ? "وب" : `صفحه ${source.page}`}`
+            );
+            box.appendChild(sourceSummary);
+            if (source.url && /^https?:\/\//i.test(source.url)) {
+                const webLink = element("a", "source-reference", "بازکردن نتیجه وب ↗");
+                webLink.href = source.url;
+                webLink.target = "_blank";
+                webLink.rel = "noopener noreferrer";
+                box.appendChild(webLink);
+            }
+            box.appendChild(element("div", "source-score", `Hybrid: ${source.vector_score} · Reranker: ${source.rerank_score}`));
+            box.appendChild(element("div", "source-text", source.text));
+            list.appendChild(box);
+        }
+        sourcePanel.appendChild(list);
+        content.appendChild(sourcePanel);
+    }
+
+    async function ask(model) {
+        const question = input.value.trim();
+        const mode = assistantMode.value;
+        if (!question || busy) return;
+        advancedOptions.open = false;
+        if (mode === "rag" && compareSelect.value && (
+            !scopeSelect.value || compareSelect.value === scopeSelect.value
+        )) {
+            modeHint.textContent = "برای مقایسه، دو فایل متفاوت انتخاب کنید.";
+            return;
+        }
+        busy = true;
+        sendButton.disabled = true;
+        preciseButton.disabled = true;
+        assistantMode.disabled = true;
+        scopeSelect.disabled = true;
+        compareSelect.disabled = true;
+        input.disabled = true;
+        activeModel.textContent = model === PRECISE_MODEL ? "Qwen3 14B · دقیق‌تر" : "Qwen3 8B · سریع";
+        modeHint.textContent = mode === "hr"
+            ? "در حال محاسبه آمار منابع انسانی…"
+            : (mode === "office"
+                ? "در حال انجام درخواست اداری…"
+                : (model === PRECISE_MODEL ? "در حال تولید پاسخ دقیق‌تر…" : "در حال تولید پاسخ…"));
+
+        addUserMessage(question);
+        const ui = addAssistantMessage(model, mode);
+        input.value = "";
+        resizeInput();
+        scrollToBottom();
+
+        const data = new FormData();
+        data.append("question", question);
+        data.append("model", model);
+        data.append("session_id", sessionId);
+        data.append("source_file", scopeSelect.value);
+        data.append("compare_file", compareSelect.value);
+        let timings = {};
+        let sources = [];
+        let receivedToken = false;
+
+        try {
+            const endpoint = mode === "hr"
+                ? "/api/hr-stream"
+                : (mode === "office" ? "/api/office-stream" : "/api/ask-stream");
+            const response = await fetch(endpoint, {method: "POST", body: data});
+            if (!response.ok || !response.body) throw new Error(`HTTP ${response.status}`);
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = "";
+
+            while (true) {
+                const {value, done} = await reader.read();
+                buffer += decoder.decode(value || new Uint8Array(), {stream: !done});
+                const lines = buffer.split("\n");
+                buffer = done ? "" : (lines.pop() || "");
+                for (const line of lines) {
+                    if (!line.trim()) continue;
+                    const event = JSON.parse(line);
+                    if (event.event === "sources") {
+                        sources = event.sources || [];
+                        timings = {...timings, ...event.timings};
+                        ui.answer.textContent = "در حال تولید پاسخ…";
+                    } else if (event.event === "progress") {
+                        if (!receivedToken) ui.answer.textContent = event.text;
+                    } else if (event.event === "token") {
+                        if (!receivedToken) { ui.answer.textContent = ""; receivedToken = true; }
+                        ui.answer.textContent += event.text;
+                        scrollToBottom();
+                    } else if (event.event === "validation") {
+                        const note = element(
+                            "div",
+                            `validation-note ${event.ok ? "" : "failed"}`,
+                            `${event.ok ? "✓" : "⚠"} ${event.message}`
+                        );
+                        ui.content.appendChild(note);
+                    } else if (event.event === "done") {
+                        timings = {...timings, ...event.timings};
+                        ui.answer.classList.remove("streaming-cursor");
+                        renderDetails(ui.content, timings, event.stats, sources, model);
+                        linkifyReferences(ui.answer, ui.content);
+                    } else if (event.event === "error") {
+                        throw new Error(event.message);
+                    }
+                }
+                if (done) break;
+            }
+        } catch (error) {
+            ui.answer.classList.remove("streaming-cursor");
+            ui.answer.classList.add("error-text");
+            ui.answer.textContent = `خطا: ${error.message}`;
+        } finally {
+            busy = false;
+            input.disabled = false;
+            sendButton.disabled = false;
+            preciseButton.disabled = false;
+            assistantMode.disabled = false;
+            scopeSelect.disabled = false;
+            compareSelect.disabled = false;
+            activeModel.textContent = "Qwen3 8B · سریع";
+            updateAssistantMode();
+            input.focus();
+            scrollToBottom();
+        }
+    }
+
+    form.addEventListener("submit", event => { event.preventDefault(); ask(FAST_MODEL); });
+    preciseButton.addEventListener("click", () => ask(PRECISE_MODEL));
+    document.getElementById("new-chat").addEventListener("click", () => window.location.reload());
+
+    window.addEventListener("pagehide", () => {
+        const data = new FormData();
+        data.append("session_id", sessionId);
+        navigator.sendBeacon("/api/session-documents/clear", data);
+    });
+
+    async function refreshDocumentOptions() {
+        const selectedScope = scopeSelect.value;
+        try {
+            const response = await fetch(`/api/documents?session_id=${encodeURIComponent(sessionId)}`);
+            if (!response.ok) return;
+            const result = await response.json();
+            scopeSelect.replaceChildren(element("option", "", "همه اسناد"));
+            scopeSelect.firstElementChild.value = "";
+            const selectedComparison = compareSelect.value;
+            compareSelect.replaceChildren(element("option", "", "بدون مقایسه"));
+            compareSelect.firstElementChild.value = "";
+            for (const name of result.files) {
+                const option = element("option", "", name);
+                option.value = name;
+                scopeSelect.appendChild(option);
+                const compareOption = element("option", "", `مقایسه با ${name}`);
+                compareOption.value = name;
+                compareSelect.appendChild(compareOption);
+            }
+            if ([...scopeSelect.options].some(option => option.value === selectedScope)) {
+                scopeSelect.value = selectedScope;
+            }
+            if ([...compareSelect.options].some(option => option.value === selectedComparison)) {
+                compareSelect.value = selectedComparison;
+            }
+        } catch (_) {
+            // The all-documents option remains usable if listing fails.
+        }
+    }
+
+    async function refreshHrStatus() {
+        try {
+            const response = await fetch("/api/hr/status");
+            if (!response.ok) throw new Error("status failed");
+            const result = await response.json();
+            if (assistantMode.value !== "hr") return;
+            modeHint.textContent = result.ready
+                ? `منابع انسانی: ${result.records.toLocaleString("fa-IR")} کارمند، ${result.columns.toLocaleString("fa-IR")} ستون`
+                : "فایل منابع انسانی آماده نیست";
+        } catch (_) {
+            if (assistantMode.value === "hr") {
+                modeHint.textContent = "خطا در بررسی داده منابع انسانی";
+            }
+        }
+    }
+
+    async function warmFastModel() {
+        const data = new FormData();
+        data.append("model", FAST_MODEL);
+        try {
+            const response = await fetch("/api/load-model", {method: "POST", body: data});
+            if (!response.ok) throw new Error("warmup failed");
+            readyDot.classList.add("ready");
+            modelStatus.textContent = "";
+        } catch (_) {
+            readyDot.classList.add("failed");
+            modelStatus.textContent = "مدل هنگام اولین سؤال بارگذاری می‌شود";
+        }
+    }
+
+    input.focus();
+    updateAssistantMode();
+    refreshDocumentOptions();
+    warmFastModel();
+</script>
+</body>
+</html>
